@@ -280,7 +280,7 @@ class CornersProblem(search.SearchProblem):
         self.walls = startingGameState.getWalls()
         self.startingPosition = startingGameState.getPacmanPosition()
         top, right = self.walls.height-2, self.walls.width-2
-        self.corners = [(1,1), (1,top), (right, 1), (right, top)]
+        self.corners = ((1,1), (1,top), (right, 1), (right, top))
         for corner in self.corners:
             if not startingGameState.hasFood(*corner):
                 print 'Warning: no food in corner ' + str(corner)
@@ -295,7 +295,7 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         # State now includes position and unvisited corners
-        return (self.startingPosition, self.corners)
+        return (self.startingPosition, list(self.corners))
 
     def isGoalState(self, state):
         """
@@ -332,6 +332,7 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
+
 
             x,y = state[0]
             dx, dy = Actions.directionToVector(action)
@@ -385,17 +386,17 @@ def cornersHeuristic(state, problem):
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
     """
-    corners = state[1][:] # These are the corner coordinates
+    cornersCopy = state[1][:] # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
     heuristic = 0
     currentPosition = state[0]
 
-    while corners:
+    while cornersCopy:
         currentX, currentY = currentPosition
 
         minCorner = None
         minDistance = float('inf')
-        for corner in corners:
+        for corner in cornersCopy:
             nextDist = manhattanDistance(currentX, currentY, corner[0], corner[1])
             if nextDist < minDistance:
                 minDistance = nextDist
@@ -403,7 +404,7 @@ def cornersHeuristic(state, problem):
 
         heuristic += minDistance
         currentPosition = minCorner
-        corners.remove(minCorner)
+        cornersCopy.remove(minCorner)
 
     return heuristic
 
