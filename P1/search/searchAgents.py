@@ -295,17 +295,19 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         # State now includes position and unvisited corners
-        return (self.startingPosition, list(self.corners))
+        return self.startingPosition, self.corners
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        isGoal = not state[1]
+        position, corners = state
+
+        isGoal = position in corners and len(corners) == 1
 
         # For display purposes only
         if isGoal:
-            self._visitedlist.append(state[0])
+            self._visitedlist.append(position)
             import __main__
             if '_display' in dir(__main__):
                 if 'drawExpandedCells' in dir(__main__._display): #@UndefinedVariable
@@ -333,8 +335,8 @@ class CornersProblem(search.SearchProblem):
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
 
-
-            x,y = state[0]
+            position, corners = state
+            x,y = position
             dx, dy = Actions.directionToVector(action)
             nextx,nexty = int(x + dx), int(y + dy)
             hitsWall = self.walls[nextx][nexty]
@@ -342,18 +344,18 @@ class CornersProblem(search.SearchProblem):
             if not hitsWall:
                 next_pos = (nextx, nexty)
 
-                if next_pos in state[1]:
-                    next_corners = state[1][:]
-                    next_corners.remove(next_pos)
-                    successors.append(((next_pos, next_corners), action, 1))
+                if position not in corners:
+                    newState = ((nextx, nexty), corners)
                 else:
-                    successors.append(((next_pos, state[1]), action, 1))
+                    newState = ((nextx, nexty), tuple([c for c in corners if c != position]))
+
+                successors.append((newState, action, 1))
 
         self._expanded += 1 # DO NOT CHANGE
 
-        if state[0] not in self._visited:
-            self._visited[state[0]] = True
-            self._visitedlist.append(state[0])
+        if position not in self._visited:
+            self._visited[position] = True
+            self._visitedlist.append(position)
 
         return successors
 
@@ -386,27 +388,18 @@ def cornersHeuristic(state, problem):
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
     """
-    cornersCopy = state[1][:] # These are the corner coordinates
+    position, corners = state # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
-    heuristic = 0
-    currentPosition = state[0]
 
-    while cornersCopy:
-        currentX, currentY = currentPosition
+    x, y = position
 
-        minCorner = None
-        minDistance = float('inf')
-        for corner in cornersCopy:
-            nextDist = manhattanDistance(currentX, currentY, corner[0], corner[1])
-            if nextDist < minDistance:
-                minDistance = nextDist
-                minCorner = corner
+    maxDistance = 0
+    for corner in corners:
+        nextDist = manhattanDistance(x, y, corner[0], corner[1])
+        if nextDist > maxDistance:
+            maxDistance = nextDist
 
-        heuristic += minDistance
-        currentPosition = minCorner
-        cornersCopy.remove(minCorner)
-
-    return heuristic
+    return maxDistance
 
 
 
@@ -507,18 +500,13 @@ def foodHeuristic(state, problem):
     if len(foodList) == 0:
         return 0
 
-    x2, y2 = position
-    distances = []
-    for x1, y1 in foodList:
-        distances.append(manhattanDistance(x1, y1, x2, y2))
-    closest = min(distances)
-    distances.remove(min(distances))
-    try:
-        avg = sum(distances)/len(distances)
-    except:
-        avg = 0
+    maxDistance = 0
+    for food in foodList:
+        nextDistance = mazeDistance(position, food, problem.startingGameState)
+        if nextDistance > maxDistance:
+            maxDistance = nextDistance
 
-    return closest + avg
+    return maxDistance
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
