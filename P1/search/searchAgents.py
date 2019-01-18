@@ -1,3 +1,7 @@
+# Andrew Katsanevas
+# Bradley Dawn
+# CS 4300 Project 1
+
 # searchAgents.py
 # ---------------
 # Licensing Information:  You are free to use or extend these projects for
@@ -390,9 +394,9 @@ def cornersHeuristic(state, problem):
     """
     position, corners = state # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
-
     x, y = position
 
+    # Find the max manhattan distance from any corner
     maxDistance = 0
     for corner in corners:
         nextDist = manhattanDistance(x, y, corner[0], corner[1])
@@ -494,12 +498,13 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-
     foodList = foodGrid.asList()
 
+    # If no food return 0
     if len(foodList) == 0:
         return 0
 
+    # Find the max maze distance from any food dot
     maxDistance = 0
     for food in foodList:
         nextDistance = mazeDistance(position, food, problem.startingGameState)
@@ -536,6 +541,7 @@ class ClosestDotSearchAgent(SearchAgent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
+        # Just use a breadth first search along with the any food problem
         return search.breadthFirstSearch(problem)
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -571,6 +577,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         """
         x,y = state
 
+        # Found a food dot!
         return self.food[x][y]
 
 def mazeDistance(point1, point2, gameState):

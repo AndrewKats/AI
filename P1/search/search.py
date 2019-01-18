@@ -1,3 +1,7 @@
+# Andrew Katsanevas
+# Bradley Dawn
+# CS 4300 Project 1
+
 # search.py
 # ---------
 # Licensing Information:  You are free to use or extend these projects for
@@ -72,9 +76,11 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+# Gets the order of moves for a solution
 def getSolutionPath(path):
 	return [p[1] for p in path][1:]
 
+# Gets the current position state of a path
 def getCurrentState(path):
 	return path[-1][0]
 
@@ -139,11 +145,13 @@ def depthFirstSearch(problem):
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     
-    # Use the generic search with a Stack
+    # Use the generic search with a Queue
     return genericSearch(problem, util.Queue())
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
+
+    # Use the generic search with a PriorityQueue and cost function
     costFunc = lambda path: problem.getCostOfActions(getSolutionPath(path))
     return genericSearch(problem, util.PriorityQueueWithFunction(costFunc))
 
@@ -156,6 +164,8 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
+
+    # Use the generic search with a PriorityQueue with a cost function with a heuristic
     costFunc = lambda path: problem.getCostOfActions(getSolutionPath(path)) + heuristic(getCurrentState(path), problem)
     return genericSearch(problem, util.PriorityQueueWithFunction(costFunc))
 
