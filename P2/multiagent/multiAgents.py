@@ -1,3 +1,7 @@
+# Andrew Katsanevas
+# Bradley Dawn
+# CS 4300 Project 2
+
 # multiAgents.py
 # --------------
 # Licensing Information:  You are free to use or extend these projects for
@@ -47,8 +51,6 @@ class ReflexAgent(Agent):
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
         chosenIndex = random.choice(bestIndices) # Pick randomly among the best
 
-        "Add more of your code here if you want to"
-
         return legalMoves[chosenIndex]
 
     def evaluationFunction(self, currentGameState, action):
@@ -74,32 +76,27 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        score = 0
+        evaluation = 0
 
-        # Change score based on ghosts
-        for g in newGhostStates:
-          dist = manhattanDistance(g.getPosition(), newPos)
-          if dist <= 1:
-          	# Being close to a scared ghost is good
-            if g.scaredTimer != 0:
-              score += 200
-            # Being close to a non-scared ghost is bad
-            else:
-              score -= 20
-
-        # Change score based on remaining food
+        # Change evaluation based on remaining food
         for x in range(currentFood.width):
           for y in range(currentFood.height):
             if currentFood[x][y]:
-              dist = manhattanDistance((x,y), newPos)
+              foodDist = manhattanDistance((x,y), newPos)
               # Getting food is good
-              if dist == 0:
-                score += 10
+              if foodDist == 0:
+                evaluation += 10
               # Being close to food is also good
               else:
-                score += 1.0 / dist
+                evaluation += 1.0 / foodDist
 
-        return score
+        # Being close to ghosts is bad.
+        for ghost in newGhostStates:
+          ghostDist = manhattanDistance(ghost.getPosition(), newPos)
+          if ghostDist < 2 and ghost.scaredTimer == 0:
+              evaluation = float('-inf')
+        
+        return evaluation
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -338,10 +335,33 @@ def betterEvaluationFunction(currentGameState):
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
 
-      DESCRIPTION: <write something here so we know what you did>
+      DESCRIPTION: Takes into account the current score, remaining food/capsules, 
+      distance from nearest food, and distance from nearest ghost.
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    # A high score is probably good. We'll use it as a baseline.
+    evaluation = currentGameState.getScore()
+
+    # We really want to get the number of foods and capsules to be lower.
+    evaluation -= 10 * (currentGameState.getNumFood() + len(currentGameState.getCapsules()))
+
+    # Being far from food is bad.
+    minFoodDist = float('inf')
+    subtract = 0
+    for food in currentGameState.getFood().asList():
+    	foodDist = util.manhattanDistance(currentGameState.getPacmanPosition(), food)
+    	if foodDist < minFoodDist:
+    		minFoodDist = foodDist
+    		subtract = foodDist
+    evaluation -= subtract
+
+    # Being close to a ghost is bad. Let's avoid them no matter what.
+    for ghost in currentGameState.getGhostStates():
+    	ghostDist = util.manhattanDistance(currentGameState.getPacmanPosition(), ghost.getPosition())
+    	if ghostDist < 2:
+    		evaluation = float('-inf')
+
+    return evaluation
 
 # Abbreviation
 better = betterEvaluationFunction
