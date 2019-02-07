@@ -212,8 +212,67 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.maxMove(gameState, 0, 0, float('-inf'), float('inf'))[1]
+
+    # Find the max score move of min score moves
+    def maxMove(self, gameState, currentDepth, agent, alpha, beta):
+    	actions = gameState.getLegalActions(agent)
+
+    	# The game is over
+    	if not actions or gameState.isWin() or currentDepth >= self.depth:
+    		return self.evaluationFunction(gameState), Directions.STOP
+
+    	maxCost = float('-inf')
+    	maxMove = Directions.STOP
+    	for move in actions:
+    		succ = gameState.generateSuccessor(agent, move)
+    		nextCost = self.minMove(succ, currentDepth, agent+1, alpha, beta)[0]
+    		if nextCost > maxCost:
+    			maxCost = nextCost
+    			maxMove = move
+
+    		# Check beta
+    		if maxCost > beta:
+    			return maxCost, maxMove
+
+    		# Update alpha
+    		alpha = max(alpha, maxCost)
+
+    	return maxCost, maxMove
+
+    # Find the min score move
+    def minMove(self, gameState, currentDepth, agent, alpha, beta):
+    	actions = gameState.getLegalActions(agent)
+
+    	# The game is over
+    	if not actions or gameState.isLose() or currentDepth >= self.depth:
+    		return self.evaluationFunction(gameState), Directions.STOP
+
+    	minCost = float('inf')
+    	minMove = Directions.STOP
+    	for move in actions:
+    		succ = gameState.generateSuccessor(agent, move)
+    		nextCost = 0
+
+    		# Go to the next depth
+    		if agent == gameState.getNumAgents() - 1:
+    			nextCost = self.maxMove(succ, currentDepth+1, 0, alpha, beta)[0]
+    		# Go to the next agent
+    		else:
+    			nextCost = self.minMove(succ, currentDepth, agent+1, alpha, beta)[0]
+
+    		if nextCost < minCost:
+    			minCost = nextCost
+    			minMove = move
+
+    		# Check alpha
+    		if minCost < alpha:
+    			return minCost, minMove
+
+    		# Update beta
+    		beta = min(beta, minCost)
+
+    	return minCost, minMove
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
