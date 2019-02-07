@@ -153,8 +153,55 @@ class MinimaxAgent(MultiAgentSearchAgent):
           gameState.getNumAgents():
             Returns the total number of agents in the game
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.maxMove(gameState, 0, 0)[1]
+
+    # Find the max score move of min score moves
+    def maxMove(self, gameState, currentDepth, agent):
+    	actions = gameState.getLegalActions(agent)
+
+    	# The game is over
+    	if not actions or gameState.isWin() or currentDepth >= self.depth:
+    		return self.evaluationFunction(gameState), Directions.STOP
+
+    	maxCost = float('-inf')
+    	maxMove = Directions.STOP
+    	for move in actions:
+    		succ = gameState.generateSuccessor(agent, move)
+    		nextCost = self.minMove(succ, currentDepth, agent+1)[0]
+    		if nextCost > maxCost:
+    			maxCost = nextCost
+    			maxMove = move
+
+    	return maxCost, maxMove
+
+    # Find the min score move
+    def minMove(self, gameState, currentDepth, agent):
+    	actions = gameState.getLegalActions(agent)
+
+    	# The game is over
+    	if not actions or gameState.isLose() or currentDepth >= self.depth:
+    		return self.evaluationFunction(gameState), Directions.STOP
+
+    	minCost = float('inf')
+    	minMove = Directions.STOP
+    	for move in actions:
+    		succ = gameState.generateSuccessor(agent, move)
+    		nextCost = 0
+
+    		# Go to the next depth
+    		if agent == gameState.getNumAgents() - 1:
+    			nextCost = self.maxMove(succ, currentDepth+1, 0)[0]
+    		# Go to the next agent
+    		else:
+    			nextCost = self.minMove(succ, currentDepth, agent+1)[0]
+
+    		if nextCost < minCost:
+    			minCost = nextCost
+    			minMove = move
+
+    	return minCost, minMove
+
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
