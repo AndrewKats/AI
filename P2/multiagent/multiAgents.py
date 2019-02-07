@@ -286,8 +286,52 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
           All ghosts should be modeled as choosing uniformly at random from their
           legal moves.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.maxMove(gameState, 0, 0)[1]
+
+    # Find the max score move of average costs
+    def maxMove(self, gameState, currentDepth, agent):
+    	actions = gameState.getLegalActions(agent)
+
+    	# The game is over
+    	if not actions or gameState.isWin() or currentDepth >= self.depth:
+    		return self.evaluationFunction(gameState), Directions.STOP
+
+    	maxCost = float('-inf')
+    	maxMove = Directions.STOP
+    	for move in actions:
+    		succ = gameState.generateSuccessor(agent, move)
+    		nextCost = self.expectedCost(succ, currentDepth, agent+1)
+    		if nextCost > maxCost:
+    			maxCost = nextCost
+    			maxMove = move
+
+    	return maxCost, maxMove
+
+    # Find the expected cost
+    def expectedCost(self, gameState, currentDepth, agent):
+    	actions = gameState.getLegalActions(agent)
+
+    	# The game is over
+    	if not actions or gameState.isLose() or currentDepth >= self.depth:
+    		return self.evaluationFunction(gameState)
+
+    	costs = []
+    	for move in actions:
+    		succ = gameState.generateSuccessor(agent, move)
+    		nextCost = 0
+
+    		# Go to the next depth
+    		if agent == gameState.getNumAgents() - 1:
+    			nextCost = self.maxMove(succ, currentDepth+1, 0)[0]
+    		# Go to the next agent
+    		else:
+    			nextCost = self.expectedCost(succ, currentDepth, agent+1)
+    		# Put this next cost into the list
+    		costs.append(nextCost)
+
+    	# Get the average cost
+    	average = sum(costs) / float(len(costs))
+    	return average
 
 def betterEvaluationFunction(currentGameState):
     """
