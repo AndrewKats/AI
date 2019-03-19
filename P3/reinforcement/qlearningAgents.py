@@ -1,3 +1,7 @@
+# Andrew Katsanevas
+# Bradley Dawn
+# CS 4300 Project 3
+
 # qlearningAgents.py
 # ------------------
 # Licensing Information:  You are free to use or extend these projects for
@@ -182,15 +186,22 @@ class ApproximateQAgent(PacmanQAgent):
           Should return Q(state,action) = w * featureVector
           where * is the dotProduct operator
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        features = self.featExtractor.getFeatures(state, action)
+
+        qVal = 0
+        for feature in features:
+          qVal += features[feature] * self.weights[feature]
+
+        return qVal
 
     def update(self, state, action, nextState, reward):
         """
            Should update your weights based on transition
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        d = (reward + self.discount * self.getValue(nextState)) - self.getQValue(state, action)
+        features = self.featExtractor.getFeatures(state, action)
+        for feature in features:
+          self.weights[feature] = self.weights[feature] + self.alpha * d * features[feature] 
 
     def final(self, state):
         "Called at the end of each game."
@@ -200,5 +211,4 @@ class ApproximateQAgent(PacmanQAgent):
         # did we finish training?
         if self.episodesSoFar == self.numTraining:
             # you might want to print your weights here for debugging
-            "*** YOUR CODE HERE ***"
             pass

@@ -1,3 +1,7 @@
+# Andrew Katsanevas
+# Bradley Dawn
+# CS 4300 Project 3
+
 # valueIterationAgents.py
 # -----------------------
 # Licensing Information:  You are free to use or extend these projects for
