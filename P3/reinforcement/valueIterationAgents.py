@@ -49,14 +49,17 @@ class ValueIterationAgent(ValueEstimationAgent):
 
 
         # Write value iteration code here
-
         for i in range(0, self.iterations):
           newVals = util.Counter()
+
+          # Find the max values for each state
           for state in self.mdp.getStates():
+            # Terminal states get value 0
             if self.mdp.isTerminal(state):
               newVals[state] = 0
             else:
               maxVal = float("-inf")
+              # Find the best possible action
               for action in self.mdp.getPossibleActions(state):
                 sum = 0
                 for nextState, prob in self.mdp.getTransitionStatesAndProbs(state, action):
@@ -98,6 +101,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         maxVal = float("-inf")
         maxPolicy = None
 
+        # Find the possible action with the max value
         for action in self.mdp.getPossibleActions(state):
           nextVal = self.computeQValueFromValues(state, action)
           if nextVal >= maxVal:

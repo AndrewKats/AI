@@ -46,6 +46,7 @@ class QLearningAgent(ReinforcementAgent):
         "You can initialize Q-values here..."
         ReinforcementAgent.__init__(self, **args)
 
+        # Initialize Q-values
         self.qvals = util.Counter()
 
     def getQValue(self, state, action):
@@ -54,8 +55,11 @@ class QLearningAgent(ReinforcementAgent):
           Should return 0.0 if we have never seen a state
           or the Q node value otherwise
         """
+
+        # If there's no Q-value for this state and action, just return 0
         if (state, action) not in self.qvals:
-          self.qvals[(state, action)] = 0.0
+          self.qvals[(state, action)] = 0
+
         return self.qvals[(state, action)]
 
 
@@ -67,13 +71,16 @@ class QLearningAgent(ReinforcementAgent):
           terminal state, you should return a value of 0.0.
         """
         actions = self.getLegalActions(state)
+
+        # If no legal actions, just return 0
         if len(actions) == 0:
-          return 0.0
+          return 0
 
         vals = util.Counter()
         for action in actions:
           vals[action] = self.getQValue(state, action)
 
+        # Return the max value
         return vals[vals.argMax()]
 
     def computeActionFromQValues(self, state):
@@ -83,6 +90,8 @@ class QLearningAgent(ReinforcementAgent):
           you should return None.
         """
         actions = self.getLegalActions(state)
+
+        # If no legal actions, just return None
         if len(actions) == 0:
           return None
 
@@ -90,6 +99,7 @@ class QLearningAgent(ReinforcementAgent):
         for action in actions:
           vals[action] = self.getQValue(state, action)
 
+        # Return the action with the max value
         return vals.argMax()
 
     def getAction(self, state):
@@ -104,13 +114,18 @@ class QLearningAgent(ReinforcementAgent):
           HINT: To pick randomly from a list, use random.choice(list)
         """
         # Pick Action
-        legalActions = self.getLegalActions(state)
+        actions = self.getLegalActions(state)
+
+        # If no legal actions, we'll return None
         action = None
         
-        if len(legalActions) != 0:
+        if len(actions) != 0:
+          # Use the coin flip
           if util.flipCoin(self.epsilon):
-            action = random.choice(legalActions)
+            # Pick randomly
+            action = random.choice(actions)
           else:
+            # Pick using Q-values
             action = self.computeActionFromQValues(state)
 
         return action
@@ -187,7 +202,6 @@ class ApproximateQAgent(PacmanQAgent):
           where * is the dotProduct operator
         """
         features = self.featExtractor.getFeatures(state, action)
-
         qVal = 0
         for feature in features:
           qVal += features[feature] * self.weights[feature]
@@ -198,7 +212,10 @@ class ApproximateQAgent(PacmanQAgent):
         """
            Should update your weights based on transition
         """
+        
+        # For use in the update
         d = (reward + self.discount * self.getValue(nextState)) - self.getQValue(state, action)
+        
         features = self.featExtractor.getFeatures(state, action)
         for feature in features:
           self.weights[feature] = self.weights[feature] + self.alpha * d * features[feature] 
