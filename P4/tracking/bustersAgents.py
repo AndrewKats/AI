@@ -1,3 +1,6 @@
+# Andrew Katsanevas
+# Bradley Dawn
+
 # bustersAgents.py
 # ----------------
 # Licensing Information:  You are free to use or extend these projects for
@@ -164,22 +167,24 @@ class GreedyBustersAgent(BustersAgent):
              if livingGhosts[i+1]]
 
         "*** YOUR CODE HERE ***"
-        
+        # Find the max of each belief distribution
         maxBeliefs = []
-        for posBelief in livingGhostPositionDistributions:
-            maxBeliefs.append(posBelief.argMax())
+        for belief in livingGhostPositionDistributions:
+            maxBeliefs.append(belief.argMax())
 
-        goalPos = None
-        goalProb = 0
+        # Find the best of the max beliefs
+        bestPos = None
+        bestProb = 0
         for i, pos in enumerate(maxBeliefs):
             belief = livingGhostPositionDistributions[i][pos]
-            if belief >= goalProb:
-                goalPos, goalProb = pos, belief
+            if belief >= bestProb:
+                bestPos = pos 
+                bestProb = belief
 
+        # Find the best action
         actionArr = []
         for a in legal:
             nextPos = Actions.getSuccessor(pacmanPosition, a)
-            actionArr.append((self.distancer.getDistance(nextPos, goalPos), a))
-
+            actionArr.append((self.distancer.getDistance(nextPos, bestPos), a))
         bestAction = min(actionArr)
         return bestAction[1]
